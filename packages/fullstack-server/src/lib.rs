@@ -37,7 +37,9 @@ pub(crate) mod document;
 pub(crate) mod ssr;
 pub(crate) mod streaming;
 
+#[cfg(not(target_arch = "wasm32"))]
 pub use launch::router;
+#[cfg(not(target_arch = "wasm32"))]
 pub use launch::serve;
 
 pub mod serverfn;

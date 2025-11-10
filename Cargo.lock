@@ -6361,7 +6361,6 @@ dependencies = [
  "dioxus-cli-config",
  "dioxus-core",
  "dioxus-core-macro",
- "dioxus-devtools",
  "dioxus-document",
  "dioxus-fullstack-core",
  "dioxus-history",

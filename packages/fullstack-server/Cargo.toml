@@ -15,7 +15,7 @@ resolver = "2"
 # Dioxus + SSR
 subsecond = { workspace =  true }
 dioxus-cli-config = { workspace = true }
-dioxus-devtools = { workspace = true, features = ["serve"] }
+#dioxus-devtools = { workspace = true, features = ["serve"] }
 dioxus-history = { workspace = true }
 dioxus-signals = { workspace = true }
 dioxus-hooks = { workspace = true }
@@ -73,10 +73,14 @@ rustc-hash = { workspace = true }
 lru  = { workspace = true }
 walkdir = { workspace = true }
 
+hyper = { workspace = true }
+tower = { workspace = true, features = ["util"] }
+
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-tokio = { workspace = true, features = ["rt", "sync", "macros"], optional = true }
-axum = { workspace = true, default-features = false, features =  [] }
 tower-http = { workspace = true, default-features = false }
+tokio = { workspace = true, features = ["rt", "sync", "macros"] }
+axum = { workspace = true, default-features = false, features =  [] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { workspace = true, features = ["rt", "sync", "rt-multi-thread", "macros", "net"] }
@@ -85,8 +89,6 @@ hyper-util = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["fs"] }
 tokio-tungstenite = { workspace = true }
 
-hyper = { workspace = true }
-tower = { workspace = true, features = ["util"] }
 
 [dev-dependencies]
 dioxus = { workspace = true, features = ["fullstack"] }

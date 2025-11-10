@@ -16,6 +16,7 @@ use std::sync::Arc;
 use tokio_util::task::LocalPoolHandle;
 use tower::util::MapResponse;
 use tower::ServiceExt;
+#[cfg(not(target_arch = "wasm32"))]
 use tower_http::services::fs::ServeFileSystemResponseBody;
 
 /// A extension trait with utilities for integrating Dioxus with your Axum router.
@@ -172,6 +173,58 @@ impl DioxusRouterExt for Router<FullstackState> {
     ) -> Router<()> {
         self.register_server_functions()
             .serve_static_assets()
+            .fallback(get(FullstackState::render_handler))
+            .with_state(FullstackState::new(cfg, app))
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl DioxusRouterExt for Router<FullstackState> {
+    // Static assets are served by the platform (Vercel, Cloudflare Workers, etc.)
+    fn serve_static_assets(self) -> Router<FullstackState> {
+        self
+    }
+
+    fn serve_dioxus_application<M: 'static>(
+        self,
+        cfg: ServeConfig,
+        app: impl ComponentFunction<(), M> + Send + Sync,
+    ) -> Router<()> {
+        self.register_server_functions()
+            .serve_static_assets()
+            .fallback(get(FullstackState::render_handler))
+            .with_state(FullstackState::new(cfg, app))
+    }
+
+    fn register_server_functions(mut self) -> Router<FullstackState> {
+        use std::collections::HashSet;
+
+        let mut seen = HashSet::new();
+
+        for func in ServerFunction::collect() {
+            if seen.insert(format!("{} {}", func.method(), func.path())) {
+                tracing::info!(
+                    "Registering server function: {} {}",
+                    func.method(),
+                    func.path()
+                );
+
+                self = self.route(func.path(), func.method_router())
+            }
+        }
+
+        self
+    }
+
+    fn serve_api_application<M: 'static>(
+        self,
+        cfg: ServeConfig,
+        app: impl ComponentFunction<(), M> + Send + Sync,
+    ) -> Router<()>
+    where
+        Self: Sized,
+    {
+        self.register_server_functions()
             .fallback(get(FullstackState::render_handler))
             .with_state(FullstackState::new(cfg, app))
     }
@@ -403,6 +456,7 @@ pub(crate) fn public_path() -> Option<PathBuf> {
     )
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn serve_dir_cached<S>(mut router: Router<S>, public_path: &Path, directory: &Path) -> Router<S>
 where
     S: Send + Sync + Clone + 'static,
@@ -447,11 +501,13 @@ where
     router
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 type MappedAxumService<S> = MapResponse<
     S,
     fn(Response<ServeFileSystemResponseBody>) -> Response<ServeFileSystemResponseBody>,
 >;
 
+#[cfg(not(target_arch = "wasm32"))]
 fn cache_response_forever<S>(service: S) -> MappedAxumService<S>
 where
     S: ServiceExt<Request<Body>, Response = Response<ServeFileSystemResponseBody>>,
@@ -465,6 +521,7 @@ where
     })
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn file_name_looks_immutable(file_name: &str) -> bool {
     // Check if the file name looks like a hash (e.g., "main-dxh12345678.js")
     file_name.rsplit_once("-dxh").is_some_and(|(_, hash)| {

@@ -112,6 +112,7 @@ members = [
     "examples/07-fullstack/desktop",
     "examples/07-fullstack/auth",
     "examples/07-fullstack/ssr-only",
+    "examples/07-fullstack/cloudflare-workers",
 
     # Integrations
     "examples/10-integrations/tailwind",

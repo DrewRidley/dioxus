@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "dioxus-cloudflare-workers" generated at 2025-11-11T14:44:40.408Z.

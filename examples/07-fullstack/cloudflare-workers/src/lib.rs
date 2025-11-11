@@ -25,5 +25,7 @@ async fn fetch(
     _env: Env,
     _ctx: Context,
 ) -> Result<http::Response<axum::body::Body>> {
-    Ok(router().call(req).await?)
+    // Run the router call within a LocalSet to enable spawn_local
+    let local = tokio::task::LocalSet::new();
+    Ok(local.run_until(router().call(req)).await?)
 }

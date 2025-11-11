@@ -11,13 +11,41 @@ use axum::{
 };
 use dioxus_core::{ComponentFunction, VirtualDom};
 use http::header::*;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
+#[cfg(not(target_arch = "wasm32"))]
 use tokio_util::task::LocalPoolHandle;
-use tower::util::MapResponse;
-use tower::ServiceExt;
 #[cfg(not(target_arch = "wasm32"))]
 use tower_http::services::fs::ServeFileSystemResponseBody;
+
+// WASM-compatible handle that uses tokio::task::spawn_local
+#[cfg(target_arch = "wasm32")]
+#[derive(Clone)]
+pub struct WasmLocalHandle;
+
+#[cfg(target_arch = "wasm32")]
+impl WasmLocalHandle {
+    pub fn new(_size: usize) -> Self {
+        Self
+    }
+
+    pub fn spawn_pinned<F, Fut, T>(&self, f: F) -> tokio::task::JoinHandle<T>
+    where
+        F: FnOnce() -> Fut + 'static,
+        Fut: std::future::Future<Output = T> + 'static,
+        T: 'static,
+    {
+        // On WASM, use tokio::task::spawn_local directly
+        // Cloudflare Workers runtime supports this
+        tokio::task::spawn_local(f())
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) type RuntimeHandle = LocalPoolHandle;
+
+#[cfg(target_arch = "wasm32")]
+pub(crate) type RuntimeHandle = WasmLocalHandle;
 
 /// A extension trait with utilities for integrating Dioxus with your Axum router.
 pub trait DioxusRouterExt {
@@ -275,7 +303,7 @@ pub struct FullstackState {
     config: ServeConfig,
     build_virtual_dom: Arc<dyn Fn() -> VirtualDom + Send + Sync>,
     renderers: Arc<SsrRendererPool>,
-    pub(crate) rt: LocalPoolHandle,
+    pub(crate) rt: RuntimeHandle,
 }
 
 impl FullstackState {
@@ -283,7 +311,7 @@ impl FullstackState {
     ///
     /// This won't render pages, but can still be used to register server functions and serve static assets.
     pub fn headless() -> Self {
-        let rt = LocalPoolHandle::new(
+        let rt = RuntimeHandle::new(
             std::thread::available_parallelism()
                 .map(usize::from)
                 .unwrap_or(1),
@@ -304,7 +332,7 @@ impl FullstackState {
         config: ServeConfig,
         root: impl ComponentFunction<(), M> + Send + Sync + 'static,
     ) -> Self {
-        let rt = LocalPoolHandle::new(
+        let rt = RuntimeHandle::new(
             std::thread::available_parallelism()
                 .map(usize::from)
                 .unwrap_or(1),
@@ -324,7 +352,7 @@ impl FullstackState {
         config: ServeConfig,
         build_virtual_dom: impl Fn() -> VirtualDom + Send + Sync + 'static,
     ) -> Self {
-        let rt = LocalPoolHandle::new(
+        let rt = RuntimeHandle::new(
             std::thread::available_parallelism()
                 .map(usize::from)
                 .unwrap_or(1),

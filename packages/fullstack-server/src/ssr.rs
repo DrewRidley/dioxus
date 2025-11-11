@@ -3,6 +3,7 @@ use crate::isrg::{
     CachedRender, IncrementalRenderer, IncrementalRendererConfig, IncrementalRendererError,
     RenderFreshness,
 };
+use crate::server::RuntimeHandle;
 use crate::streaming::{Mount, StreamingRenderer};
 use crate::{document::ServerDocument, ServeConfig};
 use dioxus_cli_config::base_path;
@@ -25,7 +26,6 @@ use std::{
     rc::Rc,
     sync::{Arc, RwLock},
 };
-use tokio_util::task::LocalPoolHandle;
 
 use crate::StreamingMode;
 
@@ -98,7 +98,7 @@ impl SsrRendererPool {
         self: Arc<Self>,
         parts: Parts,
         cfg: &ServeConfig,
-        rt: &LocalPoolHandle,
+        rt: &RuntimeHandle,
         virtual_dom_factory: impl FnOnce() -> VirtualDom + Send + Sync + 'static,
     ) -> Result<
         (

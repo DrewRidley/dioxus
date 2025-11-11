@@ -23,10 +23,11 @@ axum = { workspace = true, optional = true }
 tower-service = { version = "0.3", optional = true }
 dioxus-server = { workspace = true, optional = true }
 http = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [features]
 default = ["web"]
 web = ["dioxus", "dioxus/web"]
 desktop = ["dioxus", "dioxus/desktop"]
 mobile = ["dioxus", "dioxus/mobile"]
-server = ["worker", "axum", "tower-service", "dioxus-server", "http"]
+server = ["worker", "axum", "tower-service", "dioxus-server", "http", "tokio"]

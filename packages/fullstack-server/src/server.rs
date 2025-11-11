@@ -11,10 +11,12 @@ use axum::{
 };
 use dioxus_core::{ComponentFunction, VirtualDom};
 use http::header::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 #[cfg(not(target_arch = "wasm32"))]
 use tokio_util::task::LocalPoolHandle;
+#[cfg(not(target_arch = "wasm32"))]
+use tower::{util::MapResponse, ServiceExt};
 #[cfg(not(target_arch = "wasm32"))]
 use tower_http::services::fs::ServeFileSystemResponseBody;
 

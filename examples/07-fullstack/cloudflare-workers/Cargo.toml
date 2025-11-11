@@ -15,7 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Client-side dependencies (for web/desktop/mobile builds)
-dioxus = { workspace = true, features = ["router", "fullstack"], optional = true }
+dioxus = { workspace = true, features = ["router", "fullstack"] }
 
 # Server-side dependencies (for server builds, non-WASM only)
 worker = { version = "0.6.7", features = ["http"], optional = true }
@@ -27,7 +27,7 @@ tokio = { workspace = true, optional = true }
 
 [features]
 default = ["web"]
-web = ["dioxus", "dioxus/web"]
-desktop = ["dioxus", "dioxus/desktop"]
-mobile = ["dioxus", "dioxus/mobile"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
 server = ["worker", "axum", "tower-service", "dioxus-server", "http", "tokio"]

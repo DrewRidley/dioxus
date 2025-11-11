@@ -802,6 +802,11 @@ path = "examples/07-fullstack/websocket.rs"
 doc-scrape-examples = true
 
 [[example]]
+name = "cloudflare-workers"
+path = "examples/07-fullstack/cloudflare_workers.rs"
+doc-scrape-examples = true
+
+[[example]]
 name = "drag_and_drop"
 path = "examples/08-apis/drag_and_drop.rs"
 doc-scrape-examples = true

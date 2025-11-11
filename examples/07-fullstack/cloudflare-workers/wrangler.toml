@@ -1,0 +1,16 @@
+name = "dioxus-cloudflare-workers"
+main = "build/worker/shim.mjs"
+compatibility_date = "2023-12-18"
+
+[build]
+command = "cargo install worker-build && worker-build --release --features server"
+
+[build.upload]
+format = "modules"
+
+[vars]
+# Add any environment variables your app needs here
+
+[dev]
+port = 8787
+local_protocol = "http"

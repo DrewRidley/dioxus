@@ -1,0 +1,32 @@
+[package]
+name = "cloudflare-workers"
+version = "0.1.0"
+authors = ["Drew Ridley <drew@ridley.family>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[dependencies]
+# Client-side dependencies (for web/desktop/mobile builds)
+dioxus = { workspace = true, features = ["router", "fullstack"], optional = true }
+
+# Server-side dependencies (for server builds, non-WASM only)
+worker = { version = "0.6.7", features = ["http"], optional = true }
+axum = { workspace = true, optional = true }
+tower-service = { version = "0.3", optional = true }
+dioxus-server = { workspace = true, optional = true }
+http = { workspace = true, optional = true }
+
+[features]
+default = ["web"]
+web = ["dioxus", "dioxus/web"]
+desktop = ["dioxus", "dioxus/desktop"]
+mobile = ["dioxus", "dioxus/mobile"]
+server = ["worker", "axum", "tower-service", "dioxus-server", "http"]
